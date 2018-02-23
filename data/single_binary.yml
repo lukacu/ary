@@ -1,0 +1,11 @@
+parameters:
+    calibration: calibration.yml
+    world: Global
+anchors:
+  - template: markers/marker1.png
+    size: 50
+    identifier: Marker 1
+    type: binary
+    group: Global
+
+
