@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
         return 0;
     }
 
-    srand(clock());
+  //  srand(clock());
 
     int iterations = parser.get<int>("iterations");
 
@@ -139,9 +139,9 @@ int main(int argc, char** argv) {
 
         vector<Point2f> points;
         points.push_back(Point2f(0, 0));
-        points.push_back(Point2f(markers[m].cols, 0));
-        points.push_back(Point2f(markers[m].cols, markers[m].rows));
-        points.push_back(Point2f(0, markers[m].rows));
+        points.push_back(Point2f((float)markers[m].cols, 0));
+        points.push_back(Point2f((float)markers[m].cols, (float)markers[m].rows));
+        points.push_back(Point2f(0, (float)markers[m].rows));
 
 	    for (int a = 0; a < iterations; a++) {
 

@@ -69,6 +69,8 @@ bool KeypointPlaneLocalizer::add(const Mat& image, float size) {
 			model.keypoints.push_back(*it);
 		}
 
+        if (type == AKAZE) break; // No need for additional features.
+
 		if (size.width * size.height < 30000) break;
 
 		pyrDown(tmp_image1, tmp_image2, Size());
@@ -106,18 +108,6 @@ vector<SharedLocalization> KeypointPlaneLocalizer::localize(const Mat& image) {
 	    if (models[m].descriptors.empty() || descriptors.empty()) continue;
 
         matcher->knnMatch(models[m].descriptors, descriptors, matches, 1);
-/*
-        float min_dist = 1000000, max_dist = 0;
-
-	    // good matches are where curr_dist < dist_factor * min_dist_in_all_matches
-	    for (int i = 0; i < matches.size(); i++) { // AKAZE = 80
-		    if (!matches[i].empty()) {
-                float d = matches[i][0].distance;
-                min_dist = min(d, min_dist);
-                max_dist = min(d, max_dist);
-		    }
-	    }
-*/
 
         float threshold_absolute = 1000;
         float threshold_percentage = 1;
@@ -125,11 +115,11 @@ vector<SharedLocalization> KeypointPlaneLocalizer::localize(const Mat& image) {
         switch (type) {
         case ORB:
         	threshold_absolute = 40;
-            threshold_percentage = 0.5;
+            threshold_percentage = 0.5f;
             break;
         case AKAZE:
-        	threshold_absolute = 80;
-            threshold_percentage = 0.3;
+        	threshold_absolute = 100;
+            threshold_percentage = 0.3f;
             break;
         }
 
@@ -156,12 +146,12 @@ vector<SharedLocalization> KeypointPlaneLocalizer::localize(const Mat& image) {
 	    }
 
 	    // was able to match base image to (a subset) of the current image?
-	    if (image_points.size() < 4) continue;
+	    if (image_points.size() < 10) continue;
 
 	    Mat rotVec, transVec;
         vector<int> inliers;
 	    CameraPosition camera;
-	    if (!solvePnPRansac(object_points, image_points, getCameraModel()->getIntrinsics(), getCameraModel()->getDistortion(), rotVec, transVec, false, 100, 2, 0.99f, inliers))
+	    if (!solvePnPRansac(object_points, image_points, getCameraModel()->getIntrinsics(), getCameraModel()->getDistortion(), rotVec, transVec, false, 200, 4, 0.99f, inliers))
             continue;
 /*
 	    vector<Point3f> object_inliers;

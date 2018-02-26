@@ -1,13 +1,13 @@
 
 
 ADD_EXECUTABLE(ary_demo_keypoints demo_keypoints.cpp)
-TARGET_LINK_LIBRARIES(ary_demo_keypoints ary)
+TARGET_LINK_LIBRARIES(ary_demo_keypoints ary_static)
 
 ADD_EXECUTABLE(ary_demo_binary demo_binary.cpp)
-TARGET_LINK_LIBRARIES(ary_demo_binary ary)
+TARGET_LINK_LIBRARIES(ary_demo_binary ary_static)
 
 ADD_EXECUTABLE(ary_demo_tracking demo_tracking.cpp)
-TARGET_LINK_LIBRARIES(ary_demo_tracking ary)
+TARGET_LINK_LIBRARIES(ary_demo_tracking ary_static)
 
 ADD_EXECUTABLE(ary_demo_scene demo_scene.cpp)
-TARGET_LINK_LIBRARIES(ary_demo_scene ary)
+TARGET_LINK_LIBRARIES(ary_demo_scene ary_static)

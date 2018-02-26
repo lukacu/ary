@@ -66,21 +66,13 @@ bool TemplatePlaneVerifier::verify(const Mat& image, const SharedPlanarLocalizat
 	model_mask.setTo(0);
 
 	fillPolygon(model_mask, mask_points, Scalar(255));
-/*
-imshow("Verif", verification);
-imshow("model", model_template);
 
-imwrite("model.png", model_template);
-imwrite("query.png", verification);
-
-imshow("mask", model_mask);*/
 	double match_score = match_template(model_template, verification, model_mask);
-
-//cout << match_score << endl;
 
 	return (match_score > 0.4);
 
 }
+
 
 double TemplatePlaneVerifier::match_template(const Mat& tmpl, const Mat& query, const Mat& mask) {
 
@@ -112,6 +104,40 @@ double TemplatePlaneVerifier::match_template(const Mat& tmpl, const Mat& query, 
 	return confidence;
 }
 
+
+/*
+double TemplatePlaneVerifier::match_template(const Mat& tmpl, const Mat& query, const Mat& mask) {
+
+	double confidence;
+	double N = (double)countNonZero(mask);
+	double nom, den;
+
+	Scalar mean_query, std_query;
+	Scalar mean_tmpl, std_tmpl;
+
+	meanStdDev(query, mean_query, std_query, mask);
+	meanStdDev(tmpl, mean_tmpl, std_tmpl, mask);
+
+    Mat diff = Mat(tmpl.size(), CV_32FC1);
+
+    uchar* tmpl_ptr = reinterpret_cast<uchar*>(tmpl.data);
+    uchar* query_ptr = reinterpret_cast<uchar*>(query.data);
+    float* diff_ptr = reinterpret_cast<float*>(diff.data);
+
+    for(int i = 0; i < tmpl.rows * tmpl.cols; i++, tmpl_ptr++, query_ptr++, diff_ptr++) {
+        *diff_ptr = (float) (abs(((double) (*tmpl_ptr) - mean_tmpl[0]) / std_tmpl[0] - ((double) (*query_ptr) - mean_query[0]) / std_query[0]));
+    }
+
+
+imshow("diff", diff);
+
+
+	double sum_query = norm(diff, NORM_L1, mask);
+
+
+	return 1 - ( sum_query / N);
+}
+*/
 KeypointTrackingLocalizer::KeypointTrackingLocalizer(const SharedCameraModel& camera) : Localizer(camera), tracking_timeout(0), tracking_select(-1) {
 
 	localizer = Ptr<KeypointPlaneLocalizer>(new KeypointPlaneLocalizer(camera, ary::AKAZE));
@@ -143,7 +169,7 @@ vector<SharedLocalization> KeypointTrackingLocalizer::localize(const Mat& image)
 
         vector<SharedLocalization> candidates = localizer->localize(image);
 
-        if (candidates.size() < 1 || !verifier[candidates[0]->getIdentifier()]->verify(image, candidates[0].dynamicCast<PlanarLocalization>())) {
+        if (candidates.size() < 1) { // || !verifier[candidates[0]->getIdentifier()]->verify(image, candidates[0].dynamicCast<PlanarLocalization>())) {
 
             tracking_timeout = 10;
             return localizations;
@@ -160,7 +186,7 @@ vector<SharedLocalization> KeypointTrackingLocalizer::localize(const Mat& image)
 
         SharedLocalization tracking = tracker->update(image);
 
-        if (!tracking || !verifier[tracking_select]->verify(image, tracking.dynamicCast<PlanarLocalization>())) {
+        if (!tracking) { // || !verifier[tracking_select]->verify(image, tracking.dynamicCast<PlanarLocalization>())) {
             tracking_select = -1;
             return localizations;
         }
@@ -175,7 +201,7 @@ vector<SharedLocalization> KeypointTrackingLocalizer::localize(const Mat& image)
 			vector<SharedLocalization> candidates = localizer->localize(image);
 
             for (size_t j = 0; j < candidates.size(); j++) {
-			    if (candidates[j]->getIdentifier() == tracking_select && verifier[tracking_select]->verify(image, candidates[j].dynamicCast<PlanarLocalization>())) {
+			    if (candidates[j]->getIdentifier() == tracking_select) { // && verifier[tracking_select]->verify(image, candidates[j].dynamicCast<PlanarLocalization>())) {
 				    tracker->initialize(image, candidates[j].dynamicCast<PlanarLocalization>());
 				    tracking_timeout = 50;
                     break;
@@ -317,6 +343,8 @@ bool Scene::load(const string description) {
         anchors[localizer].push_back(Ptr<SceneAnchor>(new SceneAnchor(anchor_name, offset, group)));
 
 	}
+
+	return true;
 
 }
 

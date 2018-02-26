@@ -35,7 +35,7 @@ private:
 class BinaryPatternLocalizer: public Localizer {
 public:
 
-	BinaryPatternLocalizer(const SharedCameraModel& camera, double threshold = 5, int block_size = 45, double confidence_threshold = 0.70);
+	BinaryPatternLocalizer(const SharedCameraModel& camera, double threshold = 5, float block_size = 45, double confidence_threshold = 0.70);
 	virtual ~BinaryPatternLocalizer();
 
     void add(const Mat& model, float size);

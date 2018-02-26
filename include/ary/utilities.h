@@ -1,6 +1,10 @@
 #ifndef _ARY_UTILITIES
 #define _ARY_UTILITIES
 
+#ifndef M_PI
+#define M_PI 3.1415
+#endif
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 

@@ -14,9 +14,6 @@ namespace ary {
 
 BinaryPattern::BinaryPattern(const Mat& img, float size) : size(size) {
 
-	char* buffer;
-	size_t buffer_size;
-
 	if (img.cols != img.rows) {
 		throw runtime_error("Not a square pattern");
 	}
@@ -103,7 +100,7 @@ double BinaryPattern::match(const Mat& src, int& orientation) {
 }
 
 
-BinaryPatternLocalizer::BinaryPatternLocalizer(const SharedCameraModel& camera, double threshold, int block_size, double confidence_threshold) : Localizer(camera),
+BinaryPatternLocalizer::BinaryPatternLocalizer(const SharedCameraModel& camera, double threshold, float block_size, double confidence_threshold) : Localizer(camera),
     threshold(threshold), block_size(block_size), confidence_threshold(confidence_threshold) {
 
 }
@@ -121,7 +118,7 @@ void BinaryPatternLocalizer::add(const Mat& model, float size) {
 
 int BinaryPatternLocalizer::size() {
 
-    return patterns.size();
+    return (int)patterns.size();
 
 }
 
@@ -143,7 +140,7 @@ vector<SharedLocalization> BinaryPatternLocalizer::localize(const Mat& image) {
 	    image.copyTo(grayImage);
     }
 
-    adaptiveThreshold(grayImage, binImage, 255, CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY_INV, block_size, threshold);
+    adaptiveThreshold(grayImage, binImage, 255, CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY_INV, block_size, (int) threshold);
     dilate(binImage, binImage, Mat());
 
 	int avsize = (binImage.rows + binImage.cols) / 2;
@@ -234,7 +231,7 @@ vector<SharedLocalization> BinaryPatternLocalizer::localize(const Mat& image) {
 
 		            //find the transformation (from camera CS to pattern CS)
 		            CameraPosition camera = calculateExtrinsics(patterns[id].getSize(), rotated);
-		            localizations.push_back(Ptr<PlanarLocalization>(new PlanarLocalization(id, camera, Size2f(patterns[id].getSize(), patterns[id].getSize()), rotated, confidence)));
+		            localizations.push_back(Ptr<PlanarLocalization>(new PlanarLocalization(id, camera, Size2f(patterns[id].getSize(), patterns[id].getSize()), rotated, (float) confidence)));
 
 	            }
 

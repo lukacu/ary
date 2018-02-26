@@ -45,9 +45,7 @@ Mat Camera::getFrame() {
 
     std::lock_guard<std::recursive_mutex> lock(guard);
 
-
-
-
+	return frame;
 }
 
 
@@ -110,7 +108,7 @@ void Camera::loop() {
 
         auto used = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
-        auto remaining = std::chrono::milliseconds(std::max(1l, (int)(1000.0 / fps) - used));
+		auto remaining = std::chrono::milliseconds(std::max(1l, (long)((1000.0 / fps) - used)));
 
         std::this_thread::sleep_for(remaining);
 
