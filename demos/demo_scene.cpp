@@ -13,7 +13,7 @@ using namespace std;
 using namespace cv;
 using namespace ary;
 
-#define WINDOW_NAME "ARy Test - Binary"
+#define WINDOW_NAME "ARy Test - Scene"
 
 
 int main(int argc, char** argv) {
