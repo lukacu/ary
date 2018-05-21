@@ -6,6 +6,12 @@
 
 #include "camera.h"
 
+#if CV_MAJOR_VERSION == 2
+#define CAP_PROP_FRAME_WIDTH CV_CAP_PROP_FRAME_WIDTH
+#define CAP_PROP_FRAME_HEIGHT CV_CAP_PROP_FRAME_HEIGHT
+#elif CV_MAJOR_VERSION == 3
+
+#endif
 
 Camera::Camera(int camera) : fps(30) {
 

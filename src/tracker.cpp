@@ -1,5 +1,5 @@
 #include <iostream>
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 #include <opencv2/video/tracking.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 
@@ -65,7 +65,7 @@ void PlaneTracker::initialize(const Mat& image, SharedPlanarLocalization localiz
 	vector<Point> mask_points;
 	int mask_npoints = plane_corners.size();
 	for (int i = 0; i < plane_corners.size(); i++) {
-		mask_points.push_back(Point(plane_corners[i]));
+		mask_points.push_back(Point(plane_corners[i].x, plane_corners[i].y));
 	}
 	const Point* mask_points_ptr = &(mask_points[0]);
 

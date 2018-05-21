@@ -104,11 +104,11 @@ PlanarLocalization::~PlanarLocalization() {
 
 }
 
-Size2f PlanarLocalization::getPlaneSize() {
+Size2f PlanarLocalization::getPlaneSize() const {
 	return size;
 }
 
-vector<Point2f> PlanarLocalization::getPlaneCorners() {
+const vector<Point2f> PlanarLocalization::getPlaneCorners() const {
 	return corners;
 }
 

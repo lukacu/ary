@@ -1,7 +1,7 @@
 #ifndef _ARY_CAMERA
 #define _ARY_CAMERA
 
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 
 using namespace std;
 using namespace cv;
@@ -21,8 +21,8 @@ public:
 
 	virtual ~CameraModel();
 
-	Matx33f getIntrinsics();
-	Mat getDistortion();
+	const Matx33f getIntrinsics() const;
+	const Mat getDistortion() const;
 
 	void write(FileStorage& fs) const;
     void read(const FileNode& node);

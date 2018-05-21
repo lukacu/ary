@@ -86,7 +86,7 @@ void fillPolygon(Mat& image, const vector<Point2f>& points, Scalar value) {
 	vector<Point> mask_points(points.size());
 	int mask_npoints = points.size();
 	for (int i = 0; i < points.size(); i++) {
-		mask_points[i] = Point(points[i]);
+		mask_points[i] = Point(points[i].x, points[i].y);
 	}
 	const Point* mask_points_ptr = &(mask_points[0]);
 	fillPoly(image, &mask_points_ptr, &mask_npoints, 1, value);

@@ -27,8 +27,13 @@ void camera_set_default(int id);
 #include <mutex>
 #include <memory>
 
-#include <opencv2/videoio/videoio.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+
+#if CV_MAJOR_VERSION == 2
+#include <opencv2/highgui/highgui.hpp>
+#elif CV_MAJOR_VERSION == 3
+#include <opencv2/videoio.hpp>
+#endif
 
 using namespace cv;
 

@@ -3,13 +3,19 @@
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/imgcodecs/imgcodecs.hpp>
+//#include <opencv2/imgcodecs/imgcodecs.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include "ary/complex.h"
 #include "ary/binary.h"
 #include "ary/utilities.h"
 
 #include <opencv2/highgui/highgui.hpp>
+
+#if CV_MAJOR_VERSION == 2
+#define DYNAMIC_CAST(h, C) ((h).ptr<C>())
+#elif CV_MAJOR_VERSION == 3
+#define DYNAMIC_CAST(h, C) ((h).dynamicCast<C>())
+#endif
 
 namespace ary {
 
@@ -175,7 +181,7 @@ vector<SharedLocalization> KeypointTrackingLocalizer::localize(const Mat& image)
             return localizations;
         }
 
-        tracker->initialize(image, candidates[0].dynamicCast<PlanarLocalization>());
+        tracker->initialize(image, DYNAMIC_CAST(candidates[0], PlanarLocalization));
 
         tracking_timeout = 50;
         tracking_select = candidates[0]->getIdentifier();
@@ -195,14 +201,14 @@ vector<SharedLocalization> KeypointTrackingLocalizer::localize(const Mat& image)
 
 		if (tracking_timeout < 1) {
 
-			localizationToMask(tracking.dynamicCast<PlanarLocalization>(), image.size(), mask);
+			localizationToMask(DYNAMIC_CAST(tracking, PlanarLocalization), image.size(), mask);
 
 			localizer->setMask(mask);
 			vector<SharedLocalization> candidates = localizer->localize(image);
 
             for (size_t j = 0; j < candidates.size(); j++) {
 			    if (candidates[j]->getIdentifier() == tracking_select) { // && verifier[tracking_select]->verify(image, candidates[j].dynamicCast<PlanarLocalization>())) {
-				    tracker->initialize(image, candidates[j].dynamicCast<PlanarLocalization>());
+				    tracker->initialize(image, DYNAMIC_CAST(candidates[j], PlanarLocalization));
 				    tracking_timeout = 50;
                     break;
 			    }
@@ -304,7 +310,7 @@ bool Scene::load(const string description) {
                 continue;
             }
 
-            localizers[0].dynamicCast<BinaryPatternLocalizer>()->add(tmp, anchor_size);
+            DYNAMIC_CAST(localizers[0], BinaryPatternLocalizer)->add(tmp, anchor_size);
             localizer = 0;
 
         } else if (anchor_type == "keypoints") {
@@ -319,7 +325,7 @@ bool Scene::load(const string description) {
                 continue;
             }
 
-            localizers[1].dynamicCast<KeypointTrackingLocalizer>()->add(tmp, anchor_size);
+            DYNAMIC_CAST(localizers[1], KeypointTrackingLocalizer)->add(tmp, anchor_size);
             localizer = 1;
 
         }

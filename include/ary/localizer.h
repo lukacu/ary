@@ -34,8 +34,8 @@ public:
 	PlanarLocalization(int id, const CameraPosition& camera, Size2f size, vector<Point2f> corners, float quality = 1);
 	~PlanarLocalization();
 
-	Size2f getPlaneSize();
-	vector<Point2f> getPlaneCorners();
+	Size2f getPlaneSize() const;
+	const vector<Point2f> getPlaneCorners() const;
 
     virtual void draw(Mat& image, SharedCameraModel& model) const;
 

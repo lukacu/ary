@@ -1,7 +1,7 @@
 #ifndef _ARY_TRACKER_H
 #define _ARY_TRACKER_H
 
-#include <opencv2/core.hpp>
+#include <opencv2/core/core.hpp>
 
 #include <ary/camera.h>
 #include <ary/localizer.h>

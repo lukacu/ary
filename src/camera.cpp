@@ -41,12 +41,12 @@ CameraModel::~CameraModel() {
 
 }
 
-Matx33f CameraModel::getIntrinsics() {
+const Matx33f CameraModel::getIntrinsics() const {
 
 	return intrinsics;
 }
 
-Mat CameraModel::getDistortion() {
+const Mat CameraModel::getDistortion() const {
 	return distortion;
 
 }
@@ -60,7 +60,7 @@ SharedCameraModel CameraUser::getCameraModel() {
 }
 
 static void write(FileStorage& fs, const std::string&, const CameraPosition& x) {
-	fs << "{" << "T" << (Mat)x.translation << "R" << (Mat)x.rotation << "}";
+	fs << "{" << "T" << (const Mat)x.translation << "R" << (const Mat)x.rotation << "}";
 }
 
 static void read(const FileNode& node, CameraPosition& x, const CameraPosition& default_value) {
@@ -76,7 +76,7 @@ static void read(const FileNode& node, CameraPosition& x, const CameraPosition& 
 }
 
 static void write(FileStorage& fs, const std::string&, const SharedCameraModel& x) {
-	fs << "{" << "intrinsics" << (Mat)x->getIntrinsics() << "distrotion" << x->getDistortion() << "}";
+	fs << "{" << "intrinsics" << Mat(x->getIntrinsics()) << "distrotion" << x->getDistortion() << "}";
 
 }
 

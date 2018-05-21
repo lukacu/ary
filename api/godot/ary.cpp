@@ -3,7 +3,6 @@
 #include <stdexcept>
 #include <vector>
 
-#include <opencv2/imgcodecs/imgcodecs.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 
 #include <ary/complex.h>
