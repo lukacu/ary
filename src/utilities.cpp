@@ -104,7 +104,7 @@ string pathJoin(const string& p1, const string& p2) {
 
   string tmp = p1;
 
-  if (p1[p1.length()] != sep) { // Need to add a
+  if (!p1.empty() && p1[p1.length()] != sep) { // Need to add a
      tmp += sep;                // path separator
      return(tmp + p2);
   }

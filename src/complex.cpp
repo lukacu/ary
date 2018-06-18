@@ -146,7 +146,11 @@ imshow("diff", diff);
 */
 KeypointTrackingLocalizer::KeypointTrackingLocalizer(const SharedCameraModel& camera) : Localizer(camera), tracking_timeout(0), tracking_select(-1) {
 
-	localizer = Ptr<KeypointPlaneLocalizer>(new KeypointPlaneLocalizer(camera, ary::AKAZE));
+#if CV_MAJOR_VERSION == 2
+    localizer = Ptr<KeypointPlaneLocalizer>(new KeypointPlaneLocalizer(camera, ary::ORB));
+#elif CV_MAJOR_VERSION == 3
+    localizer = Ptr<KeypointPlaneLocalizer>(new KeypointPlaneLocalizer(camera, ary::AKAZE));
+#endif
 
     tracker = Ptr<PlaneTracker>(new PlaneTracker(camera));
 }
@@ -250,7 +254,7 @@ int SceneAnchor::getGroup() {
     return group;
 }
 
-Scene::Scene(const SharedCameraModel& camera, const string description) : Localizer(camera) {
+Scene::Scene(const SharedCameraModel& camera, const string& description) : Localizer(camera) {
 
     localizers.push_back(Ptr<Localizer>(new BinaryPatternLocalizer(camera)));
     localizers.push_back(Ptr<Localizer>(new KeypointTrackingLocalizer(camera)));
@@ -390,5 +394,46 @@ vector<SharedLocalization> Scene::localize(const Mat& image) {
 
     return localizations;
 }
+/*
+bool localize_camera(vector<PatternLocalization> detections) {
+
+    if (detections.size() < 1) return false;
+
+    PatternDetection* anchor = NULL;
+
+    Mat rotVec, transVec;
+
+    vector<Point3f> surfacePoints;
+    vector<Point2f> imagePoints;
+
+    for (unsigned int i = 0; i < detections.size(); i++) {
+
+        float size = (float) detections[i].getPattern()->getSize();
+        Matx44f transform = detections[i].getPattern()->getOffset();
+
+        surfacePoints.push_back(extractHomogeneous(transform * Scalar(-size / 2, -size / 2, 0, 1)));
+        surfacePoints.push_back(extractHomogeneous(transform * Scalar(size / 2, -size / 2, 0, 1)));
+        surfacePoints.push_back(extractHomogeneous(transform * Scalar(size / 2, size / 2, 0, 1)));
+        surfacePoints.push_back(extractHomogeneous(transform * Scalar(-size / 2, size / 2, 0, 1)));
+
+        imagePoints.push_back(detections.at(i).getCorner(0));
+        imagePoints.push_back(detections.at(i).getCorner(1));
+        imagePoints.push_back(detections.at(i).getCorner(2));
+        imagePoints.push_back(detections.at(i).getCorner(3));
+    }
+
+    //if (surfacePoints.size() > 4) {
+    //  DEBUGMSG("Estimating plane on %d points\n", (int) surfacePoints.size());
+    //  solvePnPRansac(surfacePoints, imagePoints, intrinsics, distortion, rotVec, translation, false, 100, 13.0, std::max(8, (int) surfacePoints.size() / 2));
+    //} else {
+    solvePnP(surfacePoints, imagePoints, Mat(parameters.intrinsics), parameters.distortion, rotVec, transVec);
+    //}
+    rotVec.convertTo(rotVec, CV_32F);
+    transVec.convertTo(location.translation, CV_32F);
+    Rodrigues(rotVec, location.rotation);
+
+    return true;
+}
+*/
 
 }

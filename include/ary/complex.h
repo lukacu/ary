@@ -78,7 +78,7 @@ private:
 
 class Scene: public Localizer {
 public:
-	Scene(const SharedCameraModel& camera, const string description);
+	Scene(const SharedCameraModel& camera, const string& description);
 
 	virtual ~Scene();
 
