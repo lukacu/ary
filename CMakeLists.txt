@@ -15,16 +15,21 @@ FIND_PACKAGE(OpenCV REQUIRED core imgproc video features2d calib3d)
 INCLUDE_DIRECTORIES(AFTER "${OpenCV_INCLUDE_DIRS}" "include")
 LINK_LIBRARIES(${OpenCV_LIBS})
 
-SET(SOURCES 
-	src/camera.cpp 
-	src/localizer.cpp 
-	src/keypoints.cpp 
-	src/binary.cpp 
-	src/tracker.cpp 
-	src/utilities.cpp 
+SET(SOURCES
+	src/camera.cpp
+	src/localizer.cpp
+	src/keypoints.cpp
+	src/binary.cpp
+	src/tracker.cpp
+	src/utilities.cpp
 	src/complex.cpp)
 
 ADD_LIBRARY(ary SHARED ${SOURCES})
+
+set_target_properties(ary PROPERTIES
+    VERSION 0.0.0
+    SOVERSION 0
+)
 
 ADD_LIBRARY(ary_static STATIC ${SOURCES})
 SET_PROPERTY(TARGET ary_static PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -46,13 +51,13 @@ ADD_SUBDIRECTORY(api/godot)
 ENDIF (BUILD_GODOT)
 
 INSTALL(TARGETS ary EXPORT ary_targets DESTINATION ${CMAKE_INSTALL_LIBDIR})
-INSTALL(FILES 
-	include/ary/binary.h 
-	include/ary/camera.h 
-	include/ary/complex.h 
-	include/ary/keypoints.h 
-	include/ary/localizer.h 
-	include/ary/tracker.h 
+INSTALL(FILES
+	include/ary/binary.h
+	include/ary/camera.h
+	include/ary/complex.h
+	include/ary/keypoints.h
+	include/ary/localizer.h
+	include/ary/tracker.h
 	include/ary/utilities.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/ary)
 
 configure_package_config_file(AryConfig.cmake.in
