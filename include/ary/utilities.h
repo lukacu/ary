@@ -18,7 +18,7 @@ Matx44f rotationMatrix(float x, float y, float z);
 
 Matx44f translationMatrix(float x, float y, float z);
 
-void drawSystem(Mat& image, const CameraPosition& camera, const Matx33f& intrinsics, const Mat& distortion, int size = 30, int width = 3);
+void drawSystem(Mat& image, const CameraPosition& camera, const Matx33f& intrinsics, const Mat& distortion, float size = 0.1f, int width = 3);
 
 void warpImage(Mat& target, Mat& image, const Mat& transformation, int flags = INTER_LINEAR);
 

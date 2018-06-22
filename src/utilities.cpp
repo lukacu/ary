@@ -42,7 +42,7 @@ Matx44f translationMatrix(float x, float y, float z) {
 
 }
 
-void drawSystem(Mat& image, const CameraPosition& camera, const Matx33f& intrinsics, const Mat& distortion, int size, int width)
+void drawSystem(Mat& image, const CameraPosition& camera, const Matx33f& intrinsics, const Mat& distortion, float size, int width)
 {
 
 		std::vector<cv::Point2f> model2ImagePts;

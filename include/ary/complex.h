@@ -63,9 +63,9 @@ public:
     SceneAnchor(const string name, const Matx44f& transform, int group);
     virtual ~SceneAnchor();
 
-    Matx44f getTransform();
-    string getName();
-    int getGroup();
+    Matx44f getTransform() const;
+    string getName() const;
+    int getGroup() const;
 
 private:
 
@@ -75,6 +75,19 @@ private:
 
 };
 
+class AnchoredLocalization : public Localization {
+public:
+	AnchoredLocalization(int id, const CameraPosition& camera, vector<SharedLocalization> localizations, vector<Ptr<SceneAnchor> > anchors, float quality = 1);
+	~AnchoredLocalization();
+
+    virtual void draw(Mat& image, SharedCameraModel& model) const;
+
+private:
+
+	vector<SharedLocalization> localizations;
+	vector<Ptr<SceneAnchor> > anchors;
+
+};
 
 class Scene: public Localizer {
 public:

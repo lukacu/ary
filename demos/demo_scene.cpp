@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
     if (argc < 2) return 0;
 
 	SharedCameraModel camera(new CameraModel(frame.size()));
-	Scene scene(camera, argv[1]);
+	Ptr<Scene> scene(new Scene(camera, argv[1]));
 
 	while (true) {
 
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
 
         cvtColor(frame, gray, COLOR_RGB2GRAY);
 
-		vector<SharedLocalization> localizations = scene.localize(gray);
+		vector<SharedLocalization> localizations = scene->localize(gray);
 
 		for (int i = 0; i < localizations.size(); i++) {
 
@@ -53,8 +53,14 @@ int main(int argc, char** argv) {
 		}
 
 		imshow(WINDOW_NAME, frame);
-		waitKey(30);
 
+		int k = waitKey(30);
+		if ((char)k == 'r') {
+			cout << "Reloading markers" << endl;
+			scene = Ptr<Scene>(new Scene(camera, argv[1]));
+		} else if ((char)k == 'q') {
+			break;
+		}
 	}
 
 	return 0;

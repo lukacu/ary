@@ -21,6 +21,13 @@ namespace ary {
 
 #define VERIFIER_SIZE 128
 
+inline Point3f extract_homogeneous(Matx41f hv) {
+
+    Point3f f = Point3f(hv(0, 0) / hv(3, 0), hv(1, 0) / hv(3, 0), hv(2, 0) / hv(3, 0));
+    return f;
+
+}
+
 PlaneVerifier::PlaneVerifier(const SharedCameraModel& camera) : CameraUser(camera) {}
 
 PlaneVerifier::~PlaneVerifier() {};
@@ -96,13 +103,9 @@ double TemplatePlaneVerifier::match_template(const Mat& tmpl, const Mat& query, 
 	double sum_query = norm(query, NORM_L1, mask);
 	double sum_tmpl = norm(tmpl, NORM_L1, mask);
 
-  // cout << N << " " << sum_query << " " << sum_tmpl << endl;
-
 	nom = query.dot(tmpl) - mean_query[0] * sum_tmpl - mean_tmpl[0] * sum_query + N * mean_tmpl[0] * mean_query[0] ;
 	den = N * std_query[0] * std_tmpl[0];
 	confidence = nom / den;
-
-  //  cout << nom << " " << den << endl;
 
     if (confidence > 1) confidence = 1;
 	if (confidence < 0 || confidence != confidence) confidence = 0;
@@ -241,17 +244,56 @@ SceneAnchor::~SceneAnchor() {
 
 }
 
-Matx44f SceneAnchor::getTransform() {
+Matx44f SceneAnchor::getTransform() const {
     return transform;
 }
 
 
-string SceneAnchor::getName() {
+string SceneAnchor::getName() const {
     return name;
 }
 
-int SceneAnchor::getGroup() {
+int SceneAnchor::getGroup() const {
     return group;
+}
+
+AnchoredLocalization::AnchoredLocalization(int id, const CameraPosition& camera, vector<SharedLocalization> localizations, vector<Ptr<SceneAnchor> > anchors, float quality) : 
+    Localization(id, camera, quality), localizations(localizations), anchors(anchors) {
+
+}
+
+AnchoredLocalization::~AnchoredLocalization() {
+
+}
+
+void AnchoredLocalization::draw(Mat& image, SharedCameraModel& model) const {
+
+    for (size_t i = 0; i < localizations.size(); i++) {
+        localizations[i]->draw(image, model);
+
+        std::vector<cv::Point2f> model2ImagePts;
+        
+        Matx44f offset = anchors[i]->getTransform();
+
+        Point3f origin = extract_homogeneous(offset * Scalar(0, 0, 0, 1));
+
+        Mat modelPts = (Mat_<float>(3, 3) <<
+                        0.01, 0.01, 0.01,
+                        0, 0, 0,
+                        origin.x, origin.y, origin.z);
+
+        CameraPosition camera = localizations[i]->getCameraPosition();
+
+        projectPoints(modelPts, camera.rotation, camera.translation, model->getIntrinsics(), model->getDistortion(), model2ImagePts);
+
+        line(image, model2ImagePts[1], model2ImagePts[2], Scalar(255, 255, 0), 2);
+
+        putText(image, anchors[i]->getName(), model2ImagePts[0], FONT_HERSHEY_SIMPLEX, 0.5f, Scalar(255, 100, 255), 2);
+
+    }
+
+    drawSystem(image, getCameraPosition(), model->getIntrinsics(), model->getDistortion());
+
 }
 
 Scene::Scene(const SharedCameraModel& camera, const string& description) : Localizer(camera) {
@@ -282,7 +324,7 @@ bool Scene::load(const string description) {
 		float rx, ry, rz, ox, oy, oz;
         string anchor_type, anchor_group, anchor_template, anchor_name;
 
-        read((*it)["name"], anchor_name, "");
+        read((*it)["identifier"], anchor_name, "");
         read((*it)["type"], anchor_type, "binary");
         read((*it)["group"], anchor_group, "");
 
@@ -364,9 +406,16 @@ int Scene::size() {
     return groups.size() + 1;
 }
 
+#define MODEL_SIZE 0.05
+
 vector<SharedLocalization> Scene::localize(const Mat& image) {
 
-	vector<SharedLocalization> group_localization(groups.size() + 1, Ptr<Localization>());
+    vector<vector<Point3f> > group_points_plane(groups.size() + 1);
+    vector<vector<Point2f> > group_points_image(groups.size() + 1);
+
+    vector<vector<SharedLocalization> > group_localizations(groups.size() + 1);
+
+    vector<vector<Ptr<SceneAnchor> > > group_anchors(groups.size() + 1);
 
     for (size_t i = 0; i < localizers.size(); i++) {
         vector<SharedLocalization> localizations = localizers[i]->localize(image);
@@ -374,12 +423,29 @@ vector<SharedLocalization> Scene::localize(const Mat& image) {
         for (size_t j = 0; j < localizations.size(); j++) {
             int group = anchors[i][localizations[j]->getIdentifier()]->getGroup();
 
-            Matx44f offset = anchors[i][localizations[j]->getIdentifier()]->getTransform();
-            Matx44f origin = positionToMatrix(localizations[j]->getCameraPosition());
+            Matx44f offset = (anchors[i][localizations[j]->getIdentifier()]->getTransform()).inv();
 
-            CameraPosition l = matrixToPosition(positionToMatrix(localizations[j]->getCameraPosition()) * offset);
+            vector<Point2f> image_points(4);
+            vector<Point3f> reference_points;
 
-            group_localization[group] = Ptr<Localization>(new Localization(group, l, 1));
+            reference_points.push_back(Point3f(0, 0, 0));
+            reference_points.push_back(Point3f(MODEL_SIZE, 0, 0));
+            reference_points.push_back(Point3f(0, MODEL_SIZE, 0));
+            reference_points.push_back(Point3f(0, 0, MODEL_SIZE));
+
+            projectPoints(reference_points, localizations[j]->getCameraPosition().rotation, localizations[j]->getCameraPosition().translation, getCameraModel()->getIntrinsics(), getCameraModel()->getDistortion(), image_points);
+
+            group_points_plane[group].push_back(extract_homogeneous(offset * Scalar(0, 0, 0, 1)));
+            group_points_plane[group].push_back(extract_homogeneous(offset * Scalar(MODEL_SIZE, 0, 0, 1)));
+            group_points_plane[group].push_back(extract_homogeneous(offset * Scalar(0, MODEL_SIZE, 0, 1)));
+            group_points_plane[group].push_back(extract_homogeneous(offset * Scalar(0, 0, MODEL_SIZE, 1)));
+
+            for (int k = 0; k < 4; k++) {
+                group_points_image[group].push_back(image_points[k]);
+            }
+
+            group_localizations[group].push_back(localizations[j]);
+            group_anchors[group].push_back(anchors[i][localizations[j]->getIdentifier()]);
 
         }
 
@@ -387,53 +453,58 @@ vector<SharedLocalization> Scene::localize(const Mat& image) {
 
     vector<SharedLocalization> localizations;
 
-    for (size_t i = 0; i < group_localization.size(); i++) {
-        if (group_localization[i]) localizations.push_back(group_localization[i]);
+    for (size_t i = 0; i < group_points_plane.size(); i++) {
+
+        if (group_points_plane[i].size() < 4) continue;
+
+        if (group_localizations[i].size() == 1) {
+
+            Matx44f offset = (group_anchors[i][0]->getTransform());
+
+            CameraPosition position = matrixToPosition((positionToMatrix(group_localizations[i][0]->getCameraPosition()) * offset));
+
+            localizations.push_back(Ptr<Localization>(new AnchoredLocalization(i, position, group_localizations[i], group_anchors[i])));
+
+            continue;
+
+        }
+
+        Mat rotVec, transVec;
+
+        vector<Point3f> points_plane;
+        vector<Point2f> points_image;
+
+        if (group_points_plane[i].size() > 104) {
+            vector<int> inliers;    
+            solvePnPRansac(group_points_plane[i], group_points_image[i], 
+                    getCameraModel()->getIntrinsics(), getCameraModel()->getDistortion(),
+                    rotVec, transVec, false, 100, 50.0, 4, inliers);
+
+            for (size_t j = 0; j < inliers.size(); j++) {
+                if (inliers[j] != 0) {
+                    points_plane.push_back(group_points_plane[i][j]);
+                    points_image.push_back(group_points_image[i][j]);
+                }
+            }
+
+        } else {
+            points_plane = group_points_plane[i];
+            points_image = group_points_image[i];
+        }
+
+        solvePnP(points_plane, points_image, 
+            getCameraModel()->getIntrinsics(), getCameraModel()->getDistortion(), rotVec, transVec);
+        
+        CameraPosition position;
+
+        rotVec.convertTo(position.rotation, CV_32F);
+        transVec.convertTo(position.translation, CV_32F);
+
+        localizations.push_back(Ptr<Localization>(new AnchoredLocalization(i, position, group_localizations[i], group_anchors[i])));
 
     }
 
     return localizations;
 }
-/*
-bool localize_camera(vector<PatternLocalization> detections) {
-
-    if (detections.size() < 1) return false;
-
-    PatternDetection* anchor = NULL;
-
-    Mat rotVec, transVec;
-
-    vector<Point3f> surfacePoints;
-    vector<Point2f> imagePoints;
-
-    for (unsigned int i = 0; i < detections.size(); i++) {
-
-        float size = (float) detections[i].getPattern()->getSize();
-        Matx44f transform = detections[i].getPattern()->getOffset();
-
-        surfacePoints.push_back(extractHomogeneous(transform * Scalar(-size / 2, -size / 2, 0, 1)));
-        surfacePoints.push_back(extractHomogeneous(transform * Scalar(size / 2, -size / 2, 0, 1)));
-        surfacePoints.push_back(extractHomogeneous(transform * Scalar(size / 2, size / 2, 0, 1)));
-        surfacePoints.push_back(extractHomogeneous(transform * Scalar(-size / 2, size / 2, 0, 1)));
-
-        imagePoints.push_back(detections.at(i).getCorner(0));
-        imagePoints.push_back(detections.at(i).getCorner(1));
-        imagePoints.push_back(detections.at(i).getCorner(2));
-        imagePoints.push_back(detections.at(i).getCorner(3));
-    }
-
-    //if (surfacePoints.size() > 4) {
-    //  DEBUGMSG("Estimating plane on %d points\n", (int) surfacePoints.size());
-    //  solvePnPRansac(surfacePoints, imagePoints, intrinsics, distortion, rotVec, translation, false, 100, 13.0, std::max(8, (int) surfacePoints.size() / 2));
-    //} else {
-    solvePnP(surfacePoints, imagePoints, Mat(parameters.intrinsics), parameters.distortion, rotVec, transVec);
-    //}
-    rotVec.convertTo(rotVec, CV_32F);
-    transVec.convertTo(location.translation, CV_32F);
-    Rodrigues(rotVec, location.rotation);
-
-    return true;
-}
-*/
 
 }
