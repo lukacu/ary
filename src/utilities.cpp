@@ -10,6 +10,14 @@ using namespace std;
 
 namespace ary {
 
+float draw_scale = 1;
+
+void setDrawScale(float scale) {
+
+	draw_scale = MAX(0.000000001f, scale);
+
+}
+
 Matx44f rotationMatrix(float x, float y, float z) {
 	Matx44f RX = Matx44f(
 	                 1, 0,      0,       0,
@@ -42,8 +50,9 @@ Matx44f translationMatrix(float x, float y, float z) {
 
 }
 
-void drawSystem(Mat& image, const CameraPosition& camera, const Matx33f& intrinsics, const Mat& distortion, float size, int width)
-{
+void drawSystem(Mat& image, const CameraPosition& camera, const Matx33f& intrinsics, const Mat& distortion, float size, int width) {
+
+		size *= draw_scale;
 
 		std::vector<cv::Point2f> model2ImagePts;
 		Mat modelPts = (Mat_<float>(4, 3) <<

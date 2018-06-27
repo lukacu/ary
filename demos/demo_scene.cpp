@@ -10,6 +10,7 @@
 
 #include <ary/camera.h>
 #include <ary/complex.h>
+#include <ary/utilities.h>
 
 using namespace std;
 using namespace cv;
@@ -25,6 +26,8 @@ int main(int argc, char** argv) {
 	namedWindow(WINDOW_NAME, WINDOW_AUTOSIZE);
 
 	VideoCapture capture(1);
+
+setDrawScale(1000);
 
 	capture >> frame;
 	if (frame.empty()) {

@@ -14,6 +14,8 @@ using namespace cv;
 
 namespace ary {
 
+void setDrawScale(float scale);
+
 Matx44f rotationMatrix(float x, float y, float z);
 
 Matx44f translationMatrix(float x, float y, float z);
