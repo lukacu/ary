@@ -322,11 +322,11 @@ bool Scene::load(const string description) {
 	for (FileNodeIterator it = anchor_descriptions.begin(); it != anchor_descriptions.end(); ++it) {
 		float anchor_size;
 		float rx, ry, rz, ox, oy, oz;
-        string anchor_type, anchor_group, anchor_template, anchor_name;
+        String anchor_type, anchor_group, anchor_template, anchor_name;
 
-        read((*it)["identifier"], anchor_name, "");
-        read((*it)["type"], anchor_type, "binary");
-        read((*it)["group"], anchor_group, "");
+        read((*it)["identifier"], anchor_name, String(""));
+        read((*it)["type"], anchor_type, String("binary"));
+        read((*it)["group"], anchor_group, String(""));
 
 		read((*it)["size"], anchor_size, 50);
 		read((*it)["rotation"]["x"], rx, 0);
@@ -346,7 +346,7 @@ bool Scene::load(const string description) {
 
         if (anchor_type == "binary") {
 
-            read((*it)["template"], anchor_template, "");
+            read((*it)["template"], anchor_template, String(""));
             if (anchor_template.empty()) continue;
 		    string template_file = pathJoin(root, anchor_template);
 
@@ -361,7 +361,7 @@ bool Scene::load(const string description) {
 
         } else if (anchor_type == "keypoints") {
 
-            read((*it)["template"], anchor_template, "");
+            read((*it)["template"], anchor_template, string(""));
             if (anchor_template.empty()) continue;
 		    string template_file = pathJoin(root, anchor_template);
 
