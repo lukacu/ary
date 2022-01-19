@@ -68,12 +68,12 @@ void drawSystem(Mat& image, const CameraPosition& camera, const Matx33f& intrins
 		bool up = cv::sum(rotation.col(2))[0] > 0;
 
 		if (!up)
-			cv::line(image, model2ImagePts.at(0), model2ImagePts.at(3), cvScalar(255, 100, 100), width);
+			cv::line(image, model2ImagePts.at(0), model2ImagePts.at(3), Scalar(255, 100, 100), width);
 
-		cv::line(image, model2ImagePts.at(0), model2ImagePts.at(1), cvScalar(0, 0, 255), width);
-		cv::line(image, model2ImagePts.at(0), model2ImagePts.at(2), cvScalar(0, 255, 0), width);
+		cv::line(image, model2ImagePts.at(0), model2ImagePts.at(1), Scalar(0, 0, 255), width);
+		cv::line(image, model2ImagePts.at(0), model2ImagePts.at(2), Scalar(0, 255, 0), width);
 		if (up)
-			cv::line(image, model2ImagePts.at(0), model2ImagePts.at(3), cvScalar(255, 0, 0), width);
+			cv::line(image, model2ImagePts.at(0), model2ImagePts.at(3), Scalar(255, 0, 0), width);
 
 }
 

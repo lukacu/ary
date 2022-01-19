@@ -134,19 +134,19 @@ vector<SharedLocalization> BinaryPatternLocalizer::localize(const Mat& image) {
 
     //binarize image
     if (image.channels() == 3) {
-	    cvtColor(image, grayImage, CV_BGR2GRAY);
+	    cvtColor(image, grayImage, COLOR_BGR2GRAY);
     }
     else {
 	    image.copyTo(grayImage);
     }
 
-    adaptiveThreshold(grayImage, binImage, 255, CV_ADAPTIVE_THRESH_GAUSSIAN_C, CV_THRESH_BINARY_INV, block_size, (int) threshold);
+    adaptiveThreshold(grayImage, binImage, 255, ADAPTIVE_THRESH_GAUSSIAN_C, THRESH_BINARY_INV, block_size, (int) threshold);
     dilate(binImage, binImage, Mat());
 
 	int avsize = (binImage.rows + binImage.cols) / 2;
 
 	//find contours in binary image
-	cv::findContours(binImage, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+	cv::findContours(binImage, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
 	unsigned int i;
 	Point p;

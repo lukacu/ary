@@ -20,7 +20,7 @@ Matx44f positionToMatrix(const CameraPosition& position) {
     origin = Mat(position.translation);
     cv::Rodrigues(position.rotation, basis);
 
-    matrix = 0;
+    matrix = Matx44f::zeros();
 
     matrix(0, 0) = basis.at<float>(0, 0);
     matrix(0, 1) = basis.at<float>(0, 1);

@@ -188,7 +188,7 @@ vector<SharedLocalization> KeypointTrackingLocalizer::localize(const Mat& image)
             return localizations;
         }
 
-        tracker->initialize(image, DYNAMIC_CAST(candidates[0], PlanarLocalization));
+        tracker->initialize(image, candidates[0].dynamicCast<PlanarLocalization>());
 
         tracking_timeout = 50;
         tracking_select = candidates[0]->getIdentifier();
@@ -208,14 +208,14 @@ vector<SharedLocalization> KeypointTrackingLocalizer::localize(const Mat& image)
 
 		if (tracking_timeout < 1) {
 
-			localizationToMask(DYNAMIC_CAST(tracking, PlanarLocalization), image.size(), mask);
+			localizationToMask(tracking.dynamicCast<PlanarLocalization>(), image.size(), mask);
 
 			localizer->setMask(mask);
 			vector<SharedLocalization> candidates = localizer->localize(image);
 
             for (size_t j = 0; j < candidates.size(); j++) {
 			    if (candidates[j]->getIdentifier() == tracking_select) { // && verifier[tracking_select]->verify(image, candidates[j].dynamicCast<PlanarLocalization>())) {
-				    tracker->initialize(image, DYNAMIC_CAST(candidates[j], PlanarLocalization));
+				    tracker->initialize(image, candidates[j].dynamicCast<PlanarLocalization>());
 				    tracking_timeout = 50;
                     break;
 			    }
@@ -356,7 +356,7 @@ bool Scene::load(const string description) {
                 continue;
             }
 
-            DYNAMIC_CAST(localizers[0], BinaryPatternLocalizer)->add(tmp, anchor_size);
+            localizers[0].dynamicCast<BinaryPatternLocalizer>()->add(tmp, anchor_size);
             localizer = 0;
 
         } else if (anchor_type == "keypoints") {
@@ -371,7 +371,7 @@ bool Scene::load(const string description) {
                 continue;
             }
 
-            DYNAMIC_CAST(localizers[1], KeypointTrackingLocalizer)->add(tmp, anchor_size);
+            localizers[1].dynamicCast<KeypointTrackingLocalizer>()->add(tmp, anchor_size);
             localizer = 1;
 
         }
