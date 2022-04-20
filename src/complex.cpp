@@ -299,7 +299,7 @@ void AnchoredLocalization::draw(Mat& image, SharedCameraModel& model) const {
 Scene::Scene(const SharedCameraModel& camera, const string& description) : Localizer(camera) {
 
     localizers.push_back(Ptr<Localizer>(new BinaryPatternLocalizer(camera)));
-    localizers.push_back(Ptr<Localizer>(new KeypointTrackingLocalizer(camera)));
+    //localizers.push_back(Ptr<Localizer>(new KeypointTrackingLocalizer(camera)));
 
     load(description);
 
@@ -359,7 +359,7 @@ bool Scene::load(const string description) {
             localizers[0].dynamicCast<BinaryPatternLocalizer>()->add(tmp, anchor_size);
             localizer = 0;
 
-        } else if (anchor_type == "keypoints") {
+        } /*else if (anchor_type == "keypoints") {
 
             read((*it)["template"], anchor_template, string(""));
             if (anchor_template.empty()) continue;
@@ -374,7 +374,7 @@ bool Scene::load(const string description) {
             localizers[1].dynamicCast<KeypointTrackingLocalizer>()->add(tmp, anchor_size);
             localizer = 1;
 
-        }
+        }*/
 
         if (localizer == -1) continue;
 
